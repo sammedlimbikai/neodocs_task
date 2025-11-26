@@ -6,10 +6,14 @@ class TestCase {
 
   TestCase({required this.testName, required this.ranges});
 
-  factory TestCase.fromJson(Map<String, dynamic> json) {
+  // Factory to create from a list of range objects
+  factory TestCase.fromRangeList(
+    List<dynamic> rangeList, {
+    String testName = 'Health Test',
+  }) {
     return TestCase(
-      testName: json['testName'] as String,
-      ranges: (json['ranges'] as List)
+      testName: testName,
+      ranges: rangeList
           .map((r) => RangeData.fromJson(r as Map<String, dynamic>))
           .toList(),
     );

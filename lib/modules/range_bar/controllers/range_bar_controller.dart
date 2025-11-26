@@ -3,37 +3,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/range_data.dart';
 import '../models/test_case.dart';
 
-// Add your models import here
-// import '../models/test_case.dart';
-
 class TestDataProvider extends ChangeNotifier {
-  List<TestCase> _testCases = [];
+  List<RangeData> _ranges = [];
   bool _isLoading = false;
   String? _error;
-  final Map<int, double> _inputValues = {};
+  double _inputValue = 50;
 
-  List<TestCase> get testCases => _testCases;
+  List<RangeData> get ranges => _ranges;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  double get inputValue => _inputValue;
 
-  double getInputValue(int index) {
-    return _inputValues[index] ?? _getDefaultValue(index);
-  }
+  double get maxValue => _ranges.isEmpty ? 116 : _ranges.last.max;
 
-  double _getDefaultValue(int index) {
-    if (index >= _testCases.length) return 50;
-    final ranges = _testCases[index].ranges;
-    if (ranges.isEmpty) return 50;
-    final midRange = ranges[ranges.length ~/ 2];
-    return (midRange.min + midRange.max) / 2;
-  }
-
-  void updateInputValue(int index, double value) {
-    _inputValues[index] = value;
+  void updateInputValue(double value) {
+    _inputValue = value;
     notifyListeners();
   }
+
+  // Optional: if you still need TestCase wrapper
+  TestCase get asTestCase => TestCase(testName: 'Health Test', ranges: _ranges);
 
   Future<void> fetchTestData() async {
     _isLoading = true;
@@ -41,26 +33,15 @@ class TestDataProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // API Configuration
       const String baseUrl =
           'https://nd-assignment.azurewebsites.net/api/get-ranges';
       const String bearerToken =
           'eb3dae0a10614a7e719277e07e268b12aeb3af6d7a4655472608451b321f5a95';
 
-      // Validate and parse URI
-      if (baseUrl.isEmpty) {
-        throw const FormatException('Base URL is empty');
-      }
-
       final uri = Uri.parse(baseUrl);
 
-      // Verify URI is valid
-      if (!uri.hasScheme) {
-        throw const FormatException('URL must have a scheme (http/https)');
-      }
-
-      if (uri.scheme != 'http' && uri.scheme != 'https') {
-        throw FormatException('Invalid URL scheme: ${uri.scheme}');
+      if (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
+        throw const FormatException('Invalid URL scheme');
       }
 
       debugPrint('📡 API Request Details:');
@@ -69,7 +50,6 @@ class TestDataProvider extends ChangeNotifier {
       debugPrint('   Host: ${uri.host}');
       debugPrint('   Path: ${uri.path}');
 
-      // Make HTTP request
       final response = await http
           .get(
             uri,
@@ -91,29 +71,35 @@ class TestDataProvider extends ChangeNotifier {
       debugPrint('   Content Length: ${response.body.length} bytes');
 
       if (response.statusCode == 200) {
-        // Parse JSON response
-        final data = json.decode(response.body) as Map<String, dynamic>;
+        final decoded = json.decode(response.body);
 
-        // Validate response structure
-        if (!data.containsKey('testCases')) {
-          throw const FormatException('Response missing "testCases" field');
+        // Validate that response is a List
+        if (decoded is! List) {
+          throw FormatException(
+            'Expected array response, got: ${decoded.runtimeType}',
+          );
         }
 
-        final testCasesList = data['testCases'] as List;
+        final rangesList = decoded;
 
-        if (testCasesList.isEmpty) {
-          debugPrint('⚠️  Warning: No test cases found in response');
+        if (rangesList.isEmpty) {
+          debugPrint('⚠️  Warning: No ranges found in response');
         }
 
-        _testCases = testCasesList
-            .map((tc) => TestCase.fromJson(tc as Map<String, dynamic>))
+        // Parse each range object
+        _ranges = rangesList
+            .map(
+              (rangeObj) =>
+                  RangeData.fromJson(rangeObj as Map<String, dynamic>),
+            )
             .toList();
+
         _error = null;
 
-        debugPrint('✅ Successfully loaded ${_testCases.length} test cases:');
-        for (var i = 0; i < _testCases.length; i++) {
+        debugPrint('✅ Successfully loaded ${_ranges.length} ranges:');
+        for (var i = 0; i < _ranges.length; i++) {
           debugPrint(
-            '   ${i + 1}. ${_testCases[i].testName} (${_testCases[i].ranges.length} ranges)',
+            '   ${i + 1}. ${_ranges[i].label}: ${_ranges[i].min}-${_ranges[i].max}',
           );
         }
       } else if (response.statusCode == 401) {
@@ -145,33 +131,5 @@ class TestDataProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  }
-}
-
-// Helper function to validate URL before using
-bool isValidUrl(String url) {
-  try {
-    final uri = Uri.parse(url);
-    return uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https') &&
-        uri.host.isNotEmpty;
-  } catch (e) {
-    return false;
-  }
-}
-
-// Test your URL
-void testUrl() {
-  const testUrl = 'https://nd-assignment.azurewebsites.net/api/get-ranges';
-  debugPrint('Testing URL: $testUrl');
-  debugPrint('Valid: ${isValidUrl(testUrl)}');
-
-  try {
-    final uri = Uri.parse(testUrl);
-    debugPrint('Scheme: ${uri.scheme}');
-    debugPrint('Host: ${uri.host}');
-    debugPrint('Path: ${uri.path}');
-  } catch (e) {
-    debugPrint('Error parsing URL: $e');
   }
 }

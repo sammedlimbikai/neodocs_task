@@ -87,22 +87,23 @@ class _TestCasesScreenState extends State<TestCasesScreen> {
       );
     }
 
-    if (_provider.testCases.isEmpty) {
-      return const Center(child: Text('No test cases available'));
+    if (_provider.ranges.isEmpty) {
+      return const Center(child: Text('No ranges available'));
     }
 
-    return ListView.builder(
+    // Single card display since we only have one set of ranges
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: _provider.testCases.length,
-      itemBuilder: (context, index) {
-        return TestCaseCard(
-          testCase: _provider.testCases[index],
-          value: _provider.getInputValue(index),
+      children: [
+        TestCaseCard(
+          testCase: _provider
+              .asTestCase, // Use the getter that wraps ranges in TestCase
+          value: _provider.inputValue,
           onValueChanged: (value) {
-            _provider.updateInputValue(index, value);
+            _provider.updateInputValue(value);
           },
-        );
-      },
+        ),
+      ],
     );
   }
 }

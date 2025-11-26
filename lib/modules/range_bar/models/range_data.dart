@@ -14,10 +14,14 @@ class RangeData {
   });
 
   factory RangeData.fromJson(Map<String, dynamic> json) {
+    // Parse the "range" field (e.g., "0-20")
+    final rangeStr = json['range'] as String;
+    final parts = rangeStr.split('-');
+
     return RangeData(
-      min: (json['min'] as num).toDouble(),
-      max: (json['max'] as num).toDouble(),
-      label: json['label'] as String,
+      min: double.parse(parts[0]),
+      max: double.parse(parts[1]),
+      label: json['meaning'] as String,
       color: _parseColor(json['color'] as String),
     );
   }
