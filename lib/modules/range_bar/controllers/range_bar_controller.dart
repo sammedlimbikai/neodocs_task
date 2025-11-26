@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
 import '../models/range_data.dart';
 import '../models/test_case.dart';
 
 class TestDataProvider extends ChangeNotifier {
+  final _log = Logger("TestDataProvider");
   List<RangeData> _ranges = [];
   bool _isLoading = false;
   String? _error;
@@ -44,11 +46,11 @@ class TestDataProvider extends ChangeNotifier {
         throw const FormatException('Invalid URL scheme');
       }
 
-      debugPrint('📡 API Request Details:');
-      debugPrint('   URL: $uri');
-      debugPrint('   Scheme: ${uri.scheme}');
-      debugPrint('   Host: ${uri.host}');
-      debugPrint('   Path: ${uri.path}');
+      _log.fine('📡 API Request Details:');
+      _log.fine('   URL: $uri');
+      _log.fine('   Scheme: ${uri.scheme}');
+      _log.fine('   Host: ${uri.host}');
+      _log.fine('   Path: ${uri.path}');
 
       final response = await http
           .get(
@@ -66,9 +68,9 @@ class TestDataProvider extends ChangeNotifier {
             },
           );
 
-      debugPrint('📥 Response received:');
-      debugPrint('   Status Code: ${response.statusCode}');
-      debugPrint('   Content Length: ${response.body.length} bytes');
+      _log.fine('📥 Response received:');
+      _log.fine('   Status Code: ${response.statusCode}');
+      _log.fine('   Content Length: ${response.body.length} bytes');
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -83,7 +85,7 @@ class TestDataProvider extends ChangeNotifier {
         final rangesList = decoded;
 
         if (rangesList.isEmpty) {
-          debugPrint('⚠️  Warning: No ranges found in response');
+          _log.fine('⚠️  Warning: No ranges found in response');
         }
 
         // Parse each range object
@@ -96,37 +98,37 @@ class TestDataProvider extends ChangeNotifier {
 
         _error = null;
 
-        debugPrint('✅ Successfully loaded ${_ranges.length} ranges:');
+        _log.fine('✅ Successfully loaded ${_ranges.length} ranges:');
         for (var i = 0; i < _ranges.length; i++) {
-          debugPrint(
+          _log.fine(
             '   ${i + 1}. ${_ranges[i].label}: ${_ranges[i].min}-${_ranges[i].max}',
           );
         }
       } else if (response.statusCode == 401) {
         _error = 'Authentication failed. Please check your bearer token.';
-        debugPrint('❌ 401 Unauthorized: Invalid or expired token');
+        _log.fine('❌ 401 Unauthorized: Invalid or expired token');
       } else if (response.statusCode == 404) {
         _error = 'API endpoint not found.';
-        debugPrint('❌ 404 Not Found: Check the API URL');
+        _log.fine('❌ 404 Not Found: Check the API URL');
       } else if (response.statusCode >= 500) {
         _error = 'Server error: ${response.statusCode}';
-        debugPrint('❌ Server Error: ${response.statusCode}');
+        _log.fine('❌ Server Error: ${response.statusCode}');
       } else {
         _error = 'Failed to load data: ${response.statusCode}';
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        _log.fine('❌ HTTP Error: ${response.statusCode}');
       }
     } on FormatException catch (e) {
       _error = 'Invalid data format: ${e.message}';
-      debugPrint('❌ Format Error: $e');
+      _log.fine('❌ Format Error: $e');
     } on http.ClientException catch (e) {
       _error = 'Network error: Unable to connect';
-      debugPrint('❌ Client Error: $e');
+      _log.fine('❌ Client Error: $e');
     } on Exception catch (e) {
       _error = 'Error: ${e.toString()}';
-      debugPrint('❌ Exception: $e');
+      _log.fine('❌ Exception: $e');
     } catch (e) {
       _error = 'Unexpected error: ${e.toString()}';
-      debugPrint('❌ Unexpected Error: $e');
+      _log.fine('❌ Unexpected Error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
