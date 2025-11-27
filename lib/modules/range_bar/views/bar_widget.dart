@@ -19,61 +19,119 @@ class BarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 80,
-          child: Stack(
-            children: [
-              // Bar sections
-              Row(
-                children: ranges.map((range) {
-                  final width = (range.max - range.min) / maxValue;
-                  return Expanded(
-                    flex: (width * 1000).round(),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: range.color,
-                        border: Border.all(color: Colors.white, width: 1),
-                      ),
-                      child: Center(
-                        child: Text(
-                          range.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: ranges.map((range) {
+              final width = (range.max - range.min) / maxValue;
+              return Expanded(
+                flex: (width * 1000).round(),
+                child: Center(
+                  child: Text(
+                    range.label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      color: Colors.black87,
                     ),
-                  );
-                }).toList(),
-              ),
-              // Value indicator
-              Positioned(
-                left:
-                    (value /
-                            maxValue *
-                            MediaQuery.of(context).size.width *
-                            0.85)
-                        .clamp(0.0, MediaQuery.of(context).size.width * 0.85),
-                top: 0,
-                bottom: 0,
-                child: CustomPaint(painter: IndicatorPainter(value: value)),
-              ),
-            ],
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('0', style: Theme.of(context).textTheme.bodySmall),
-            Text(
-              maxValue.toStringAsFixed(0),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+        SizedBox(
+          height: 50,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: Row(
+                      children: ranges.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final range = entry.value;
+                        final width = (range.max - range.min) / maxValue;
+                        final isLast = index == ranges.length - 1;
+
+                        return Expanded(
+                          flex: (width * 1000).round(),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: range.color,
+                              border: Border(
+                                right: isLast
+                                    ? BorderSide.none
+                                    : const BorderSide(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  // Value indicator
+                  Positioned(
+                    left: (value / maxValue * constraints.maxWidth).clamp(
+                      0.0,
+                      constraints.maxWidth,
+                    ),
+                    top: 0,
+                    bottom: 0,
+                    child: CustomPaint(painter: IndicatorPainter(value: value)),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: [
+              Text(
+                ranges.first.min.toStringAsFixed(0),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black54,
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    for (int i = 0; i < ranges.length; i++)
+                      Expanded(
+                        flex:
+                            ((ranges[i].max - ranges[i].min) / maxValue * 1000)
+                                .round(),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              ranges[i].max.toStringAsFixed(0),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black54,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

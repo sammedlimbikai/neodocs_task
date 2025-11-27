@@ -17,19 +17,11 @@ class _TestCasesScreenState extends State<TestCasesScreen> {
   void initState() {
     super.initState();
     _provider.fetchTestData();
-    _provider.addListener(_onProviderUpdate);
-  }
-
-  void _onProviderUpdate() {
-    // This ensures the UI rebuilds when provider notifies
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   @override
   void dispose() {
-    _provider.removeListener(_onProviderUpdate);
+    _provider.dispose();
     super.dispose();
   }
 
@@ -41,7 +33,10 @@ class _TestCasesScreenState extends State<TestCasesScreen> {
         centerTitle: true,
         elevation: 2,
       ),
-      body: _buildBody(),
+      body: ListenableBuilder(
+        listenable: _provider,
+        builder: (context, child) => _buildBody(),
+      ),
     );
   }
 
@@ -91,13 +86,11 @@ class _TestCasesScreenState extends State<TestCasesScreen> {
       return const Center(child: Text('No ranges available'));
     }
 
-    // Single card display since we only have one set of ranges
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         TestCaseCard(
-          testCase: _provider
-              .asTestCase, // Use the getter that wraps ranges in TestCase
+          testCase: _provider.asTestCase,
           value: _provider.inputValue,
           onValueChanged: (value) {
             _provider.updateInputValue(value);
