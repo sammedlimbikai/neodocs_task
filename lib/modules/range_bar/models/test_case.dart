@@ -6,11 +6,7 @@ class TestCase {
 
   TestCase({required this.testName, required this.ranges});
 
-  // Factory to create from a list of range objects
-  factory TestCase.fromRangeList(
-    List<dynamic> rangeList, {
-    String testName = 'Health Test',
-  }) {
+  factory TestCase.fromRangeList(List<dynamic> rangeList, String testName) {
     return TestCase(
       testName: testName,
       ranges: rangeList

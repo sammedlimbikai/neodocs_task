@@ -52,7 +52,6 @@ class BarWidget extends StatelessWidget {
             builder: (context, constraints) {
               return Stack(
                 children: [
-                  // Rounded bar with color sections
                   ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child: Row(
@@ -97,7 +96,6 @@ class BarWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Range limits below the bar - using Stack to prevent overflow
         SizedBox(
           height: 20,
           child: LayoutBuilder(

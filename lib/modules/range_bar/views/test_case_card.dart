@@ -34,7 +34,6 @@ class _TestCaseCardState extends State<TestCaseCard> {
   @override
   void didUpdateWidget(TestCaseCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Only update if value changed externally (not from this text field)
     if (widget.value != oldWidget.value) {
       _controller.text = widget.value.toStringAsFixed(1);
     }

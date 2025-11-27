@@ -57,7 +57,6 @@ class CustomHttp extends http.BaseClient {
       _log.fine('<-- Headers: ${streamedResponse.headers}');
       _log.fine('<-- Body: $responseBody');
 
-      // Create new response with the body we already read
       return http.StreamedResponse(
         http.ByteStream.fromBytes(responseBytes),
         streamedResponse.statusCode,

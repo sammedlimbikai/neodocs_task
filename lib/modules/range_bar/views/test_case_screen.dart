@@ -11,7 +11,7 @@ class TestCasesScreen extends StatefulWidget {
 }
 
 class _TestCasesScreenState extends State<TestCasesScreen> {
-  final TestDataProvider _provider = TestDataProvider();
+  final RangeBarController _provider = RangeBarController();
 
   @override
   void initState() {

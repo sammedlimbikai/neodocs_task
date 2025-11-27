@@ -9,7 +9,7 @@ import 'package:neodocs_task/core/custom_http.dart';
 import '../models/range_data.dart';
 import '../models/test_case.dart';
 
-class TestDataProvider extends ChangeNotifier {
+class RangeBarController extends ChangeNotifier {
   final _log = Logger("TestDataProvider");
   List<RangeData> _ranges = [];
   bool _isLoading = false;
@@ -28,7 +28,6 @@ class TestDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Optional: if you still need TestCase wrapper
   TestCase get asTestCase => TestCase(testName: 'Health Test', ranges: _ranges);
 
   Future<void> fetchTestData() async {
@@ -41,9 +40,9 @@ class TestDataProvider extends ChangeNotifier {
         Uri.parse(Endpoints.getRanges),
       );
 
-      _log.fine('📥 Response received:');
-      _log.fine('   Status Code: ${response.statusCode}');
-      _log.fine('   Content Length: ${response.body.length} bytes');
+      _log.fine('Response received:');
+      _log.fine('Status Code: ${response.statusCode}');
+      _log.fine('Content Length: ${response.body.length} bytes');
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
