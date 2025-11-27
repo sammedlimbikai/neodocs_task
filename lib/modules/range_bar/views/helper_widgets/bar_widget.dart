@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/range_data.dart';
+import '../../models/range_data.dart';
 import 'indicator_painter.dart';
 
 class BarWidget extends StatelessWidget {

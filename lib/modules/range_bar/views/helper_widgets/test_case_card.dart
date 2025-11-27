@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:neodocs_task/modules/range_bar/views/bar_widget.dart';
+import 'package:neodocs_task/modules/range_bar/views/helper_widgets/bar_widget.dart';
 
-import '../models/test_case.dart';
+import '../../models/test_case.dart';
 
 class TestCaseCard extends StatefulWidget {
   final TestCase testCase;

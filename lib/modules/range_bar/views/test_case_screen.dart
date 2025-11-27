@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/range_bar_controller.dart';
-import 'test_case_card.dart';
+import 'helper_widgets/test_case_card.dart';
 
 class TestCasesScreen extends StatefulWidget {
   const TestCasesScreen({super.key});
