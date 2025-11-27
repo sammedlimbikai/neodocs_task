@@ -60,7 +60,6 @@ class RangeBarController extends ChangeNotifier {
           _log.warning('No ranges found in response');
         }
 
-        // Parse each range object
         _ranges = rangesList
             .map(
               (rangeObj) =>
