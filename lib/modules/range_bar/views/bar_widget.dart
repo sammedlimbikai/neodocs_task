@@ -19,6 +19,7 @@ class BarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Range labels above the bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Row(
@@ -31,11 +32,12 @@ class BarWidget extends StatelessWidget {
                     range.label,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 11,
+                      fontSize: 10,
                       color: Colors.black87,
                     ),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               );
@@ -43,12 +45,14 @@ class BarWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        // Bar with indicator
         SizedBox(
           height: 50,
           child: LayoutBuilder(
             builder: (context, constraints) {
               return Stack(
                 children: [
+                  // Rounded bar with color sections
                   ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child: Row(
@@ -93,47 +97,65 @@ class BarWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            children: [
-              Text(
-                ranges.first.min.toStringAsFixed(0),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black54,
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (int i = 0; i < ranges.length; i++)
-                      Expanded(
-                        flex:
-                            ((ranges[i].max - ranges[i].min) / maxValue * 1000)
-                                .round(),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              ranges[i].max.toStringAsFixed(0),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black54,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+        // Range limits below the bar - using Stack to prevent overflow
+        SizedBox(
+          height: 20,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: _buildRangeMarkers(context, constraints.maxWidth),
+              );
+            },
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildRangeMarkers(BuildContext context, double totalWidth) {
+    final markers = <Widget>[];
+    double currentPosition = 0;
+
+    for (int i = 0; i < ranges.length; i++) {
+      final range = ranges[i];
+      final rangeWidth = (range.max - range.min) / maxValue * totalWidth;
+
+      // Add start marker for first range
+      if (i == 0) {
+        markers.add(
+          Positioned(
+            left: 0,
+            child: Text(
+              range.min.toStringAsFixed(0),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 10,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Add end marker for each range
+      currentPosition += rangeWidth;
+      final markerPosition = currentPosition.clamp(0.0, totalWidth - 20);
+
+      markers.add(
+        Positioned(
+          left: markerPosition,
+          child: Text(
+            range.max.toStringAsFixed(0),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+              color: Colors.black54,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return markers;
   }
 }

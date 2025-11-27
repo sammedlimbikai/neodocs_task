@@ -8,12 +8,14 @@ class TestCaseCard extends StatefulWidget {
   final TestCase testCase;
   final double value;
   final ValueChanged<double> onValueChanged;
+  final VoidCallback? onReload;
 
   const TestCaseCard({
     super.key,
     required this.testCase,
     required this.value,
     required this.onValueChanged,
+    this.onReload,
   });
 
   @override
@@ -54,9 +56,25 @@ class _TestCaseCardState extends State<TestCaseCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.testCase.testName,
-              style: Theme.of(context).textTheme.titleLarge,
+            // Header with title and reload button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.testCase.testName,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                if (widget.onReload != null)
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: widget.onReload,
+                    tooltip: 'Reload data',
+                    color: Colors.blue,
+                    iconSize: 28,
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             TextField(

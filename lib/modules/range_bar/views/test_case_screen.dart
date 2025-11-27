@@ -95,6 +95,9 @@ class _TestCasesScreenState extends State<TestCasesScreen> {
           onValueChanged: (value) {
             _provider.updateInputValue(value);
           },
+          onReload: () {
+            _provider.fetchTestData();
+          },
         ),
       ],
     );
